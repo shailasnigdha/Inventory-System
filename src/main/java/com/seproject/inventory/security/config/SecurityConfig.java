@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,8 +29,29 @@ public class SecurityConfig {
                         .requestMatchers("/buyer/**").hasRole("BUYER")
                         .anyRequest().authenticated()
                 )
-                .formLogin(login -> login.permitAll())
-                .logout(logout -> logout.permitAll());
+                .formLogin(login -> login
+                        .loginPage("/web/login")
+                        .successHandler((request, response, authentication) -> {
+
+                            String role = authentication.getAuthorities()
+                                    .iterator().next().getAuthority();
+
+                            if (role.equals("ROLE_ADMIN")) {
+                                response.sendRedirect("/web/admin/dashboard");
+                            } else if (role.equals("ROLE_SELLER")) {
+                                response.sendRedirect("/web/seller/dashboard");
+                            } else {
+                                response.sendRedirect("/web/buyer/dashboard");
+                            }
+                        })
+                        .permitAll()
+                )
+
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/web/login?logout")
+                        .permitAll()
+                );
 
         return http.build();
     }
@@ -45,15 +65,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * Configure Spring Security to use the custom UserDetailsService
-     */
-    @Bean
-    public AuthenticationManagerBuilder configureAuth(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(customUserDetailsService)
-                .passwordEncoder(passwordEncoder());
-        return auth;
     }
 }

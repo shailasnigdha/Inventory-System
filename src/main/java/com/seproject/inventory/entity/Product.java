@@ -3,11 +3,9 @@ package com.seproject.inventory.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "products")
 public class Product {
@@ -18,11 +16,10 @@ public class Product {
 
     private String name;
 
-    private double price;
-
     private int quantity;
 
-    // Seller who created the product
+    private double price;
+
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private User seller;
