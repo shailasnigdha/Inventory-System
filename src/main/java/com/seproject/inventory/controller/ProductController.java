@@ -1,8 +1,12 @@
 package com.seproject.inventory.controller;
 
+import com.seproject.inventory.dto.ProductDto;
 import com.seproject.inventory.entity.Product;
 import com.seproject.inventory.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,37 +19,38 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // SELLER only
     @PreAuthorize("hasRole('SELLER')")
-    @PostMapping("/create/{sellerId}")
-    public Product createProduct(@RequestBody Product product, @PathVariable Long sellerId) {
-        return productService.createProduct(product, sellerId);
+    @PostMapping
+    public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDto productDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto));
     }
 
-    // SELLER only
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        return productService.updateProduct(id, product);
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductDto productDto) {
+        return ResponseEntity.ok(productService.updateProduct(id, productDto));
     }
 
-    // ADMIN only
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public String deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return "Product deleted!";
+        return ResponseEntity.noContent().build();
     }
 
-    // Everyone
     @GetMapping
-    public List<Product> getAll() {
-        return productService.getAllProducts();
+    public ResponseEntity<List<Product>> getAll() {
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
-    // Everyone
     @GetMapping("/{id}")
-    public Product getOne(@PathVariable Long id) {
-        return productService.getProductById(id);
+    public ResponseEntity<Product> getOne(@PathVariable Long id) {
+        return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<Product>> getBySeller(@PathVariable Long sellerId) {
+        return ResponseEntity.ok(productService.getProductsBySeller(sellerId));
     }
 }

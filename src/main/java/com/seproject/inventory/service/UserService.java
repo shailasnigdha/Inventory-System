@@ -5,4 +5,6 @@ import com.seproject.inventory.entity.User;
 
 public interface UserService {
     User registerUser(UserRegisterDto dto, String roleName);
+
+    User findByUsername(String username);
 }

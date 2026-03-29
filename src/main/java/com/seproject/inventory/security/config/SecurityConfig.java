@@ -2,16 +2,21 @@ package com.seproject.inventory.security.config;
 
 import com.seproject.inventory.security.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -25,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Allow Thymeleaf UI pages
                         .requestMatchers("/web/auth/**").permitAll()
-                        .requestMatchers("/web/css/**", "/web/js/**", "/web/images/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // API auth
                         .requestMatchers("/auth/**").permitAll()
@@ -44,6 +49,7 @@ public class SecurityConfig {
                 )
                 .formLogin(login -> login
                         .loginPage("/web/auth/login")   // your custom login
+                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/web/redirect", true)
                         .permitAll()
                 )
@@ -66,5 +72,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProvider());
     }
 }

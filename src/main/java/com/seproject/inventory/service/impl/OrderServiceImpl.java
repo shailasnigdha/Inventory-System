@@ -1,8 +1,11 @@
 package com.seproject.inventory.service.impl;
 
+import com.seproject.inventory.dto.OrderDto;
 import com.seproject.inventory.entity.Order;
 import com.seproject.inventory.entity.Product;
 import com.seproject.inventory.entity.User;
+import com.seproject.inventory.exception.BadRequestException;
+import com.seproject.inventory.exception.ResourceNotFoundException;
 import com.seproject.inventory.repository.OrderRepository;
 import com.seproject.inventory.repository.ProductRepository;
 import com.seproject.inventory.repository.UserRepository;
@@ -21,32 +24,85 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     @Override
-    public Order placeOrder(Long buyerId, Long productId, int quantity) {
-        User buyer = userRepository.findById(buyerId)
-                .orElseThrow(() -> new RuntimeException("Buyer not found"));
+    public Order placeOrder(OrderDto dto) {
+        if (dto.getQuantity() <= 0) {
+            throw new BadRequestException("Order quantity must be at least 1");
+        }
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        User buyer = userRepository.findById(dto.getBuyerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer not found with id: " + dto.getBuyerId()));
 
-        if (product.getQuantity() < quantity)
-            throw new RuntimeException("Not enough stock");
-
-        product.setQuantity(product.getQuantity() - quantity);
-        productRepository.save(product);
+        Product product = getProductOrThrow(dto.getProductId());
+        updateStock(product, dto.getQuantity());
 
         Order order = new Order();
         order.setBuyer(buyer);
         order.setProduct(product);
-        order.setQuantity(quantity);
+        order.setQuantity(dto.getQuantity());
 
         return orderRepository.save(order);
     }
 
     @Override
+    public Order updateOrder(Long orderId, OrderDto dto) {
+        if (dto.getQuantity() <= 0) {
+            throw new BadRequestException("Order quantity must be at least 1");
+        }
+
+        Order existingOrder = getOrderById(orderId);
+
+        Product previousProduct = existingOrder.getProduct();
+        previousProduct.setQuantity(previousProduct.getQuantity() + existingOrder.getQuantity());
+        productRepository.save(previousProduct);
+
+        User buyer = userRepository.findById(dto.getBuyerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer not found with id: " + dto.getBuyerId()));
+
+        Product newProduct = getProductOrThrow(dto.getProductId());
+        updateStock(newProduct, dto.getQuantity());
+
+        existingOrder.setBuyer(buyer);
+        existingOrder.setProduct(newProduct);
+        existingOrder.setQuantity(dto.getQuantity());
+
+        return orderRepository.save(existingOrder);
+    }
+
+    @Override
+    public void deleteOrder(Long orderId) {
+        Order order = getOrderById(orderId);
+        Product product = order.getProduct();
+        product.setQuantity(product.getQuantity() + order.getQuantity());
+        productRepository.save(product);
+        orderRepository.delete(order);
+    }
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+    }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    @Override
     public List<Order> getOrdersByBuyer(Long buyerId) {
-        return orderRepository.findAll()
-                .stream()
-                .filter(o -> o.getBuyer().getId().equals(buyerId))
-                .toList();
+        return orderRepository.findByBuyerId(buyerId);
+    }
+
+    private Product getProductOrThrow(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+    }
+
+    private void updateStock(Product product, int quantityToDeduct) {
+        if (product.getQuantity() < quantityToDeduct) {
+            throw new BadRequestException("Not enough stock for product id: " + product.getId());
+        }
+        product.setQuantity(product.getQuantity() - quantityToDeduct);
+        productRepository.save(product);
     }
 }

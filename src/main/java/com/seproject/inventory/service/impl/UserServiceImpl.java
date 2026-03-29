@@ -3,6 +3,8 @@ package com.seproject.inventory.service.impl;
 import com.seproject.inventory.dto.UserRegisterDto;
 import com.seproject.inventory.entity.Role;
 import com.seproject.inventory.entity.User;
+import com.seproject.inventory.exception.BadRequestException;
+import com.seproject.inventory.exception.ResourceNotFoundException;
 import com.seproject.inventory.repository.RoleRepository;
 import com.seproject.inventory.repository.UserRepository;
 import com.seproject.inventory.service.UserService;
@@ -23,8 +25,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User registerUser(UserRegisterDto dto, String roleName) {
 
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new BadRequestException("Username is already taken");
+        }
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new BadRequestException("Email is already registered");
+        }
+
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
 
         User user = User.builder()
                 .username(dto.getUsername())
@@ -34,5 +43,11 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElse(null);
     }
 }

@@ -1,16 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seller Dashboard</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<h1>Seller Dashboard</h1>
+<div class="container">
+  <h1>Seller Dashboard</h1>
+  <div class="nav">
+    <a href="/products">Browse Products API</a>
+    <a class="secondary" href="/logout">Logout</a>
+  </div>
 
-<nav>
-  <a href="/web/seller/products">My Products</a> |
-  <a href="/web/seller/orders">My Orders</a> |
-  <a href="/logout">Logout</a>
-</nav>
+  <div class="card">
+    <h3>Manage your inventory</h3>
+    <p class="muted">Create and update products through secure seller endpoints.</p>
+    <p><code>POST /products</code> with <code>name</code>, <code>price</code>, <code>quantity</code>, and <code>sellerId</code>.</p>
+    <p><code>PUT /products/{id}</code> to keep stock and price updated.</p>
+  </div>
+
+  <div class="card">
+    <h3>View your product catalog</h3>
+    <p>Use <code>GET /products/seller/{sellerId}</code> to list only your products.</p>
+  </div>
+</div>
 
 </body>
 </html>
