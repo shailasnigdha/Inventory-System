@@ -23,38 +23,39 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Allow Thymeleaf UI pages
+                        .requestMatchers("/web/auth/**").permitAll()
+                        .requestMatchers("/web/css/**", "/web/js/**", "/web/images/**").permitAll()
+
+                        // API auth
                         .requestMatchers("/auth/**").permitAll()
+
+                        // Role-based dashboards
+                        .requestMatchers("/web/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/web/seller/**").hasRole("SELLER")
+                        .requestMatchers("/web/buyer/**").hasRole("BUYER")
+
+                        // API role protected endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/seller/**").hasRole("SELLER")
                         .requestMatchers("/buyer/**").hasRole("BUYER")
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
-                        .loginPage("/web/login")
-                        .successHandler((request, response, authentication) -> {
-
-                            String role = authentication.getAuthorities()
-                                    .iterator().next().getAuthority();
-
-                            if (role.equals("ROLE_ADMIN")) {
-                                response.sendRedirect("/web/admin/dashboard");
-                            } else if (role.equals("ROLE_SELLER")) {
-                                response.sendRedirect("/web/seller/dashboard");
-                            } else {
-                                response.sendRedirect("/web/buyer/dashboard");
-                            }
-                        })
+                        .loginPage("/web/auth/login")   // your custom login
+                        .defaultSuccessUrl("/web/redirect", true)
                         .permitAll()
                 )
-
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/web/login?logout")
+                        .logoutSuccessUrl("/web/auth/login?logout")
                         .permitAll()
                 );
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(
