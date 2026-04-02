@@ -13,6 +13,8 @@ public class ProductDto {
 	@NotBlank(message = "Product name is required")
     private String name;
 
+    private String description;
+
     @Positive(message = "Price must be greater than zero")
     private double price;
 

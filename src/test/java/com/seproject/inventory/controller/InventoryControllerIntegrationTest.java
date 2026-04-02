@@ -85,7 +85,7 @@ class InventoryControllerIntegrationTest {
     @Test
     @WithMockUser(username = "buyer1", roles = {"BUYER"})
     void getProducts_ReturnsOk() throws Exception {
-        Product product = new Product(null, "Laptop", 5, 1200.0, seller);
+        Product product = new Product(null, "Laptop", "Gaming laptop", 5, 1200.0, seller);
         productRepository.save(product);
 
         mockMvc.perform(get("/products"))
@@ -98,6 +98,7 @@ class InventoryControllerIntegrationTest {
     void createProduct_AsSeller_ReturnsCreated() throws Exception {
         String payload = "{" +
                 "\"name\":\"Monitor\"," +
+                "\"description\":\"4K Monitor\"," +
                 "\"price\":200.0," +
                 "\"quantity\":8," +
                 "\"sellerId\":" + seller.getId() +
@@ -113,7 +114,7 @@ class InventoryControllerIntegrationTest {
     @Test
     @WithMockUser(username = "buyer2", roles = {"BUYER"})
     void placeOrder_AsBuyer_ReturnsCreated() throws Exception {
-        Product product = productRepository.save(new Product(null, "SSD", 10, 99.0, seller));
+        Product product = productRepository.save(new Product(null, "SSD", "Fast SSD", 10, 99.0, seller));
         String payload = "{" +
                 "\"buyerId\":" + buyer.getId() + "," +
                 "\"productId\":" + product.getId() + "," +

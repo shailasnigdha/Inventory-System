@@ -49,7 +49,7 @@ class OrderServiceImplTest {
     @Test
     void placeOrder_Success() {
         User buyer = User.builder().id(1L).build();
-        Product product = new Product(2L, "SSD", 10, 90.0, User.builder().id(3L).build());
+        Product product = new Product(2L, "SSD", "Fast storage", 10, 90.0, User.builder().id(3L).build());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(buyer));
         when(productRepository.findById(2L)).thenReturn(Optional.of(product));
@@ -65,7 +65,7 @@ class OrderServiceImplTest {
     @Test
     void placeOrder_ThrowsWhenStockInsufficient() {
         User buyer = User.builder().id(1L).build();
-        Product product = new Product(2L, "SSD", 1, 90.0, User.builder().id(3L).build());
+        Product product = new Product(2L, "SSD", "Fast storage", 1, 90.0, User.builder().id(3L).build());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(buyer));
         when(productRepository.findById(2L)).thenReturn(Optional.of(product));
@@ -83,11 +83,11 @@ class OrderServiceImplTest {
     @Test
     void updateOrder_ReleasesOldStockAndAppliesNewStock() {
         User oldBuyer = User.builder().id(1L).build();
-        Product oldProduct = new Product(5L, "Mouse", 5, 20.0, User.builder().id(4L).build());
-        Order existing = new Order(11L, 2, oldBuyer, oldProduct);
+        Product oldProduct = new Product(5L, "Mouse", "Wireless", 5, 20.0, User.builder().id(4L).build());
+        Order existing = new Order(11L, 2, "Pending", java.time.LocalDateTime.now(), oldBuyer, oldProduct);
 
         User newBuyer = User.builder().id(7L).build();
-        Product newProduct = new Product(2L, "SSD", 10, 90.0, User.builder().id(3L).build());
+        Product newProduct = new Product(2L, "SSD", "Fast storage", 10, 90.0, User.builder().id(3L).build());
 
         OrderDto updateDto = new OrderDto();
         updateDto.setBuyerId(7L);
@@ -108,8 +108,8 @@ class OrderServiceImplTest {
 
     @Test
     void deleteOrder_RestoresStock() {
-        Product product = new Product(2L, "SSD", 4, 90.0, User.builder().id(3L).build());
-        Order order = new Order(11L, 3, User.builder().id(1L).build(), product);
+        Product product = new Product(2L, "SSD", "Fast storage", 4, 90.0, User.builder().id(3L).build());
+        Order order = new Order(11L, 3, "Pending", java.time.LocalDateTime.now(), User.builder().id(1L).build(), product);
 
         when(orderRepository.findById(11L)).thenReturn(Optional.of(order));
 

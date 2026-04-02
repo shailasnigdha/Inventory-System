@@ -28,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = new Product();
         product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
         product.setQuantity(productDto.getQuantity());
         product.setSeller(seller);
@@ -45,6 +46,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + productDto.getSellerId()));
 
         existing.setName(productDto.getName());
+        existing.setDescription(productDto.getDescription());
         existing.setPrice(productDto.getPrice());
         existing.setQuantity(productDto.getQuantity());
         existing.setSeller(seller);

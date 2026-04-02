@@ -1,5 +1,6 @@
 package com.seproject.inventory.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,8 @@ public class Product {
 
     private String name;
 
+    private String description;
+
     private int quantity;
 
     private double price;
@@ -23,4 +26,16 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private User seller;
+
+    @Transient
+    @JsonProperty("stock")
+    public int getStock() {
+        return this.quantity;
+    }
+
+    @Transient
+    @JsonProperty("sellerId")
+    public Long getSellerId() {
+        return this.seller != null ? this.seller.getId() : null;
+    }
 }

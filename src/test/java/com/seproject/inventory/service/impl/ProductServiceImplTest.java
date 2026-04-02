@@ -72,7 +72,7 @@ class ProductServiceImplTest {
 
     @Test
     void updateProduct_Success() {
-        Product existing = new Product(4L, "Mouse", 5, 12.5, User.builder().id(2L).build());
+        Product existing = new Product(4L, "Mouse", "Wireless mouse", 5, 12.5, User.builder().id(2L).build());
         User seller = User.builder().id(1L).username("seller1").build();
 
         when(productRepository.findById(4L)).thenReturn(Optional.of(existing));

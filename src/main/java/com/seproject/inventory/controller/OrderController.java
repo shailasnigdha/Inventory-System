@@ -55,4 +55,19 @@ public class OrderController {
     public ResponseEntity<List<Order>> getBuyerOrders(@PathVariable Long buyerId) {
         return ResponseEntity.ok(orderService.getOrdersByBuyer(buyerId));
     }
+
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<Order>> getSellerOrders(@PathVariable Long sellerId) {
+        return ResponseEntity.ok(orderService.getOrdersBySeller(sellerId));
+    }
+
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @PutMapping("/{orderId}/confirm")
+    public ResponseEntity<Order> confirmOrder(@PathVariable Long orderId) {
+        Order order = orderService.getOrderById(orderId);
+        order.setStatus("Delivered");
+        orderService.updateOrder(orderId, new OrderDto());
+        return ResponseEntity.ok(order);
+    }
 }

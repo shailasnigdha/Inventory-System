@@ -93,6 +93,11 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByBuyerId(buyerId);
     }
 
+    @Override
+    public List<Order> getOrdersBySeller(Long sellerId) {
+        return orderRepository.findBySellerIdOrderByCreatedAtDesc(sellerId);
+    }
+
     private Product getProductOrThrow(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
