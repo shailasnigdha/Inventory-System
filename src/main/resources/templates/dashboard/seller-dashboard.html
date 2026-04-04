@@ -395,14 +395,24 @@
 
   // Load seller products
   function loadProducts() {
-    if (!currentSellerId) return;
+    if (!currentSellerId) {
+      console.error('currentSellerId not set');
+      return;
+    }
+
+    console.log('Loading products for seller:', currentSellerId);
 
     fetch(`${API_BASE}products/seller/${currentSellerId}`)
-      .then(res => res.json())
+      .then(res => {
+        console.log('Response status:', res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(products => {
+        console.log('Products received:', products);
         const container = document.getElementById('productsContainer');
 
-        if (products.length === 0) {
+        if (!products || products.length === 0) {
           container.innerHTML = '<div class="empty-state"><p>📭 No products yet</p></div>';
           updateStats(0, 0, 0);
         } else {
@@ -422,15 +432,17 @@
             </thead>
             <tbody>
               ${products.map(product => {
-                totalStock += product.stock;
-                totalValue += (product.price * product.stock);
+                const stock = product.stock || 0;
+                const price = parseFloat(product.price) || 0;
+                totalStock += stock;
+                totalValue += (price * stock);
                 return `
                 <tr>
-                  <td><strong>${product.name}</strong></td>
+                  <td><strong>${product.name || 'N/A'}</strong></td>
                   <td>${product.description || 'N/A'}</td>
-                  <td>$${parseFloat(product.price).toFixed(2)}</td>
-                  <td><span style="background: #d4edda; padding: 0.25rem 0.5rem; border-radius: 4px;">${product.stock} units</span></td>
-                  <td>$${(product.price * product.stock).toFixed(2)}</td>
+                  <td>$${price.toFixed(2)}</td>
+                  <td><span style="background: #d4edda; padding: 0.25rem 0.5rem; border-radius: 4px;">${stock} units</span></td>
+                  <td>$${(price * stock).toFixed(2)}</td>
                 </tr>
               `}).join('')}
             </tbody>
@@ -443,36 +455,46 @@
       })
       .catch(err => {
         console.error('Error loading products:', err);
-        document.getElementById('productsContainer').innerHTML = '<p style="color: red;">Failed to load products.</p>';
+        document.getElementById('productsContainer').innerHTML = '<p style="color: red;">Failed to load products. Error: ' + err.message + '</p>';
       });
   }
 
   // Load seller orders
   function loadSellerOrders() {
-    if (!currentSellerId) return;
+    if (!currentSellerId) {
+      console.error('currentSellerId not set');
+      return;
+    }
+
+    console.log('Loading orders for seller:', currentSellerId);
 
     fetch(`${API_BASE}orders/seller/${currentSellerId}`)
-      .then(res => res.json())
+      .then(res => {
+        console.log('Response status:', res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(orders => {
+        console.log('Orders received:', orders);
         const container = document.getElementById('ordersContainer');
 
-        if (orders.length === 0) {
+        if (!orders || orders.length === 0) {
           container.innerHTML = '<div class="empty-state"><p>📭 No orders yet</p></div>';
         } else {
           const ordersList = orders.map(order => `
             <div class="order-card">
               <div class="order-header">
                 <div>
-                  <h4 style="margin: 0;">${order.product.name}</h4>
+                  <h4 style="margin: 0;">${order.product ? order.product.name : 'Unknown Product'}</h4>
                   <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                    Order #${order.id} | Quantity: ${order.quantity} | Price: $${parseFloat(order.product.price).toFixed(2)} each
+                    Order #${order.id} | Quantity: ${order.quantity} | Price: $${order.product ? parseFloat(order.product.price).toFixed(2) : '0.00'} each
                   </p>
                   <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">
-                    Buyer: <strong>${order.buyer.username}</strong> | Order Date: ${new Date(order.createdAt).toLocaleString()}
+                    Buyer: <strong>${order.buyer ? order.buyer.username : 'Unknown'}</strong> | Order Date: ${new Date(order.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <span class="order-status ${order.status === 'Delivered' ? 'status-delivered' : 'status-pending'}">
-                  ${order.status}
+                  ${order.status || 'Pending'}
                 </span>
               </div>
               ${order.status !== 'Delivered' ? `
@@ -486,7 +508,7 @@
       })
       .catch(err => {
         console.error('Error loading orders:', err);
-        document.getElementById('ordersContainer').innerHTML = '<p style="color: red;">Failed to load orders.</p>';
+        document.getElementById('ordersContainer').innerHTML = '<p style="color: red;">Failed to load orders. Error: ' + err.message + '</p>';
       });
   }
 

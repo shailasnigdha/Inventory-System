@@ -12,11 +12,13 @@ import com.seproject.inventory.repository.UserRepository;
 import com.seproject.inventory.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
     private final UserRepository userRepository;
@@ -78,24 +80,35 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> getOrdersByBuyer(Long buyerId) {
         return orderRepository.findByBuyerId(buyerId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> getOrdersBySeller(Long sellerId) {
         return orderRepository.findBySellerIdOrderByCreatedAtDesc(sellerId);
+    }
+
+    @Override
+    public Order updateOrderStatus(Long orderId, String status) {
+        Order order = getOrderById(orderId);
+        order.setStatus(status);
+        return orderRepository.save(order);
     }
 
     private Product getProductOrThrow(Long productId) {

@@ -48,8 +48,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex, HttpServletRequest request) {
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(baseError(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected server error", request, null));
+                .body(baseError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage() != null ? ex.getMessage() : "Unexpected server error", request, null));
     }
 
     private ApiErrorResponse baseError(HttpStatus status, String message, HttpServletRequest request,

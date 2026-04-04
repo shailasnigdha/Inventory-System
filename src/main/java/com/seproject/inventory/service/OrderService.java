@@ -13,4 +13,5 @@ public interface OrderService {
     List<Order> getAllOrders();
     List<Order> getOrdersByBuyer(Long buyerId);
     List<Order> getOrdersBySeller(Long sellerId);
+    Order updateOrderStatus(Long orderId, String status);
 }
