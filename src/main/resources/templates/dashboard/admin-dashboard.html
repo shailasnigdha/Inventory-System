@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<h1>Admin Dashboard</h1>
+<div class="container">
+  <h1>Admin Dashboard</h1>
+  <div class="nav">
+    <a href="/products">All Products API</a>
+    <a href="/orders">All Orders API</a>
+    <a class="secondary" href="/logout">Logout</a>
+  </div>
 
-<nav>
-  <a href="/web/admin/products">Manage Products</a> |
-  <a href="/web/admin/orders">View Orders</a> |
-  <a href="/logout">Logout</a>
-</nav>
+  <div class="card">
+    <h3>Administration tasks</h3>
+    <p class="muted">As admin, you can review all orders and remove invalid products.</p>
+    <p>Use <code>DELETE /products/{id}</code> to remove a product and <code>GET /orders</code> to review all orders.</p>
+  </div>
+
+  <div class="card">
+    <h3>Quick health check</h3>
+    <p class="muted">Verify APIs after deployment:</p>
+    <p><code>GET /products</code> and <code>GET /orders</code></p>
+  </div>
+</div>
 
 </body>
 </html>

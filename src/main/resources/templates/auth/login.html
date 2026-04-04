@@ -1,21 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Login</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
+<div class="container">
+    <div class="card" style="max-width: 480px; margin: 2rem auto;">
+        <h2>Sign in to Inventory</h2>
+        <p class="muted">Use your account credentials to continue.</p>
 
-<h2>Login</h2>
+        <div class="alert success" th:if="${param.registered}">Registration successful. Please log in.</div>
+        <div class="alert info" th:if="${param.logout}">You have been logged out.</div>
+        <div class="alert info" th:if="${param.error}">Invalid username or password.</div>
 
-<form method="post" action="/auth/login">
-    <label>Username:</label>
-    <input type="text" name="username" required />
+        <form method="post" th:action="@{/login}">
+            <label for="username">Username</label>
+            <input id="username" type="text" name="username" required>
 
-    <label>Password:</label>
-    <input type="password" name="password" required />
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password" required>
 
-    <button type="submit">Login</button>
-</form>
+            <button type="submit">Login</button>
+        </form>
 
+        <p class="muted">No account yet? <a th:href="@{/web/auth/register}">Create one</a></p>
+    </div>
+</div>
 </body>
 </html>
