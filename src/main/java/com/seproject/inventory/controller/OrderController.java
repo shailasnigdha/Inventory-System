@@ -65,9 +65,7 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @PutMapping("/{orderId}/confirm")
     public ResponseEntity<Order> confirmOrder(@PathVariable Long orderId) {
-        Order order = orderService.getOrderById(orderId);
-        order.setStatus("Delivered");
-        orderService.updateOrder(orderId, new OrderDto());
+        Order order = orderService.updateOrderStatus(orderId, "Delivered");
         return ResponseEntity.ok(order);
     }
 }

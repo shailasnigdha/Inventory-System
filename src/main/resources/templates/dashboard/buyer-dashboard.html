@@ -308,55 +308,72 @@
         const container = document.getElementById('productsContainer');
         const select = document.getElementById('productSelect');
 
-        if (products.length === 0) {
+        if (!products || products.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: #999;">No products available at the moment.</p>';
         } else {
+          // Filter out of stock products from marketplace display
+          const inStockProducts = products.filter(p => p.stock && p.stock > 0);
+
           const grid = document.createElement('div');
           grid.className = 'products-grid';
 
-          products.forEach(product => {
+          inStockProducts.forEach(product => {
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
-              <h4>${product.name}</h4>
+              <h4>${product.name || 'N/A'}</h4>
               <p>${product.description || 'No description'}</p>
-              <p><strong>Seller ID:</strong> ${product.sellerId}</p>
-              <div class="price">$${parseFloat(product.price).toFixed(2)}</div>
-              <p><strong>Stock:</strong> <span style="color: ${product.stock > 0 ? '#28a745' : '#dc3545'}">${product.stock} units</span></p>
+              <p><strong>Seller ID:</strong> ${product.sellerId || 'N/A'}</p>
+              <div class="price">$${parseFloat(product.price || 0).toFixed(2)}</div>
+              <p><strong>Stock:</strong> <span style="color: #28a745;">${product.stock} units</span></p>
             `;
             grid.appendChild(card);
 
-            // Add to order form select
+            // Add to order form select (only in-stock products)
             const option = document.createElement('option');
             option.value = product.id;
             option.textContent = `${product.name} (Stock: ${product.stock}) - $${parseFloat(product.price).toFixed(2)}`;
-            option.disabled = product.stock <= 0;
             select.appendChild(option);
           });
 
-          container.innerHTML = '';
-          container.appendChild(grid);
+          if (inStockProducts.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #999;">No products in stock at the moment.</p>';
+          } else {
+            container.innerHTML = '';
+            container.appendChild(grid);
+          }
+
           document.getElementById('orderForm').style.display = 'block';
           document.getElementById('orderFormLoading').style.display = 'none';
         }
       })
       .catch(err => {
         console.error('Error loading products:', err);
-        document.getElementById('productsContainer').innerHTML = '<p style="color: red;">Failed to load products. Please refresh the page.</p>';
-        document.getElementById('orderFormLoading').innerHTML = '<p style="color: red;">Failed to load form. Please refresh the page.</p>';
+        document.getElementById('productsContainer').innerHTML = '<p style="color: red;">Failed to load products. Error: ' + err.message + '</p>';
+        document.getElementById('orderFormLoading').innerHTML = '<p style="color: red;">Failed to load form. Error: ' + err.message + '</p>';
       });
   }
 
   // Load buyer orders
   function loadBuyerOrders() {
-    if (!currentBuyerId) return;
+    if (!currentBuyerId) {
+      console.error('currentBuyerId not set');
+      return;
+    }
+
+    console.log('Loading orders for buyer:', currentBuyerId);
 
     fetch(`${API_BASE}orders/buyer/${currentBuyerId}`)
-      .then(res => res.json())
+      .then(res => {
+        console.log('Response status:', res.status);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(orders => {
+        console.log('Orders received:', orders);
         const container = document.getElementById('ordersContainer');
 
-        if (orders.length === 0) {
+        if (!orders || orders.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: #999;">You haven\'t placed any orders yet.</p>';
         } else {
           const table = document.createElement('table');
@@ -395,7 +412,7 @@
       })
       .catch(err => {
         console.error('Error loading orders:', err);
-        document.getElementById('ordersContainer').innerHTML = '<p style="color: red;">Failed to load order history. Please refresh the page.</p>';
+        document.getElementById('ordersContainer').innerHTML = '<p style="color: red;">Failed to load order history. Error: ' + err.message + '</p>';
       });
   }
 
