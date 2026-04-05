@@ -30,7 +30,16 @@ public class WebAuthController {
     @PostMapping("/register")
     public String registerUser(@ModelAttribute UserRegisterDto dto,
                                @RequestParam(defaultValue = "BUYER") String role) {
+        // Only allow BUYER and SELLER roles for registration, never ADMIN
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            role = "BUYER"; // Default to BUYER if someone tries to register as admin
+        }
         userService.registerUser(dto, role.toUpperCase());
         return "redirect:/web/auth/login?registered";
+    }
+
+    @GetMapping("/admin/login")
+    public String adminLoginPage() {
+        return "auth/admin-login";
     }
 }
