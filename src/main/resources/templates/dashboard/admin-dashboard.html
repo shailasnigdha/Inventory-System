@@ -5,28 +5,252 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" th:href="@{/css/app.css}">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
+    .header h1 { margin: 0; font-size: 2.5em; }
+    .header p { margin: 10px 0 0 0; font-size: 1.1em; opacity: 0.9; }
+
+    .nav { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+    .nav a { padding: 12px 24px; background: white; color: #667eea; text-decoration: none; border-radius: 5px; font-weight: bold; border: 2px solid #667eea; transition: all 0.3s; }
+    .nav a:hover { background: #667eea; color: white; }
+    .nav a.secondary { background: #f0f0f0; color: #333; border-color: #ccc; }
+    .nav a.secondary:hover { background: #e74c3c; color: white; border-color: #e74c3c; }
+
+    .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .card h3 { margin-top: 0; color: #667eea; font-size: 1.5em; }
+    .card p { color: #666; line-height: 1.6; }
+    .card code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+
+    .api-section { background: #f9f9f9; padding: 20px; border-left: 4px solid #667eea; margin: 15px 0; }
+    .api-button { display: inline-block; margin: 10px 5px 10px 0; padding: 12px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+    .api-button:hover { background: #764ba2; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+    .endpoint { font-family: monospace; background: #f0f0f0; padding: 10px; border-radius: 3px; margin: 10px 0; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .stat { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat .number { font-size: 2em; font-weight: bold; }
+    .stat .label { font-size: 0.9em; opacity: 0.9; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    table th { background: #667eea; color: white; padding: 12px; text-align: left; }
+    table td { padding: 10px; border-bottom: 1px solid #ddd; }
+    table tr:hover { background: #f5f5f5; }
+  </style>
 </head>
 <body>
 <div class="container">
-  <h1>Admin Dashboard</h1>
+  <!-- Header -->
+  <div class="header">
+    <h1>🔐 Admin Dashboard</h1>
+    <p>Inventory Management System Administration</p>
+  </div>
+
+  <!-- Navigation -->
   <div class="nav">
-    <a href="/products">All Products API</a>
-    <a href="/orders">All Orders API</a>
-    <a class="secondary" href="/logout">Logout</a>
+    <a href="#products">📦 All Products API</a>
+    <a href="#orders">📋 All Orders API</a>
+    <a href="#users">👥 All Users API</a>
+    <a href="/logout" class="secondary">🚪 Logout</a>
   </div>
 
-  <div class="card">
-    <h3>Administration tasks</h3>
-    <p class="muted">As admin, you can review all orders and remove invalid products.</p>
-    <p>Use <code>DELETE /products/{id}</code> to remove a product and <code>GET /orders</code> to review all orders.</p>
+  <!-- Main Dashboard -->
+  <div class="dashboard">
+
+    <!-- Administration Tasks -->
+    <div class="card">
+      <h3>⚙️ Administration Tasks</h3>
+      <p>As admin, you can review all orders and remove invalid products.</p>
+      <div class="api-section">
+        <p><strong>Key Operations:</strong></p>
+        <div class="endpoint">DELETE /products/{id}</div>
+        <p>Remove a product from the system</p>
+        <div class="endpoint">GET /orders</div>
+        <p>Review all orders in the system</p>
+      </div>
+      <p style="font-size: 0.9em; color: #999;">Use the API buttons below to perform operations</p>
+    </div>
+
+    <!-- Quick Health Check -->
+    <div class="card">
+      <h3>❤️ Quick Health Check</h3>
+      <p>Verify APIs after deployment:</p>
+      <div class="api-section">
+        <p><strong>Endpoints to Check:</strong></p>
+        <div class="endpoint">GET /admin/api/products</div>
+        <div class="endpoint">GET /admin/api/orders</div>
+        <div class="endpoint">GET /admin/api/users</div>
+      </div>
+      <p style="font-size: 0.9em; color: #999;">Click the API buttons to test functionality</p>
+    </div>
+
+    <!-- System Overview -->
+    <div class="card">
+      <h3>📊 System Overview</h3>
+      <p>Real-time statistics of your inventory system:</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="number" id="productCount">0</div>
+          <div class="label">Products</div>
+        </div>
+        <div class="stat">
+          <div class="number" id="orderCount">0</div>
+          <div class="label">Orders</div>
+        </div>
+        <div class="stat">
+          <div class="number" id="userCount">0</div>
+          <div class="label">Users</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Quick health check</h3>
-    <p class="muted">Verify APIs after deployment:</p>
-    <p><code>GET /products</code> and <code>GET /orders</code></p>
+  <!-- Products API Section -->
+  <div class="card" id="products" style="margin-top: 30px;">
+    <h3>📦 All Products API</h3>
+    <p>View all products across all sellers in the system.</p>
+    <div class="api-section">
+      <strong>Endpoint:</strong>
+      <div class="endpoint">GET /admin/api/products</div>
+      <p>Returns a JSON list of all products with details including name, price, quantity, seller information, and timestamps.</p>
+    </div>
+    <button class="api-button" onclick="loadProducts()">🔄 Load All Products</button>
+    <button class="api-button" onclick="clearData()">🗑️ Clear Data</button>
+    <div id="products-container" style="margin-top: 20px;"></div>
   </div>
+
+  <!-- Orders API Section -->
+  <div class="card" id="orders" style="margin-top: 30px;">
+    <h3>📋 All Orders API</h3>
+    <p>View all orders in the system with complete details.</p>
+    <div class="api-section">
+      <strong>Endpoint:</strong>
+      <div class="endpoint">GET /admin/api/orders</div>
+      <p>Returns a JSON list of all orders including buyer, seller, product, quantity, price, and status information.</p>
+    </div>
+    <button class="api-button" onclick="loadOrders()">🔄 Load All Orders</button>
+    <button class="api-button" onclick="clearData()">🗑️ Clear Data</button>
+    <div id="orders-container" style="margin-top: 20px;"></div>
+  </div>
+
+  <!-- Users API Section -->
+  <div class="card" id="users" style="margin-top: 30px;">
+    <h3>👥 All Users API</h3>
+    <p>View all registered users in the system.</p>
+    <div class="api-section">
+      <strong>Endpoint:</strong>
+      <div class="endpoint">GET /admin/api/users</div>
+      <p>Returns a JSON list of all users including username, email, roles, and account status.</p>
+    </div>
+    <button class="api-button" onclick="loadUsers()">🔄 Load All Users</button>
+    <button class="api-button" onclick="clearData()">🗑️ Clear Data</button>
+    <div id="users-container" style="margin-top: 20px;"></div>
+  </div>
+
 </div>
+
+<script>
+  // Load all data on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    loadStats();
+  });
+
+  // Load system statistics
+  function loadStats() {
+    Promise.all([
+      fetch('/admin/api/products').then(r => r.json()),
+      fetch('/admin/api/orders').then(r => r.json()),
+      fetch('/admin/api/users').then(r => r.json())
+    ]).then(([products, orders, users]) => {
+      document.getElementById('productCount').textContent = products.length || 0;
+      document.getElementById('orderCount').textContent = orders.length || 0;
+      document.getElementById('userCount').textContent = users.length || 0;
+    }).catch(err => console.log('Error loading stats:', err));
+  }
+
+  // Load products
+  function loadProducts() {
+    const container = document.getElementById('products-container');
+    container.innerHTML = '<p>Loading...</p>';
+
+    fetch('/admin/api/products')
+      .then(r => r.json())
+      .then(data => {
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p>No products found</p>';
+          return;
+        }
+        let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Quantity</th><th>Seller</th></tr></thead><tbody>';
+        data.forEach(p => {
+          html += `<tr><td>${p.id}</td><td>${p.name}</td><td>$${p.price}</td><td>${p.quantity}</td><td>${p.sellerName || 'N/A'}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      })
+      .catch(err => {
+        container.innerHTML = '<p style="color: red;">Error: ' + err.message + '</p>';
+      });
+  }
+
+  // Load orders
+  function loadOrders() {
+    const container = document.getElementById('orders-container');
+    container.innerHTML = '<p>Loading...</p>';
+
+    fetch('/admin/api/orders')
+      .then(r => r.json())
+      .then(data => {
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p>No orders found</p>';
+          return;
+        }
+        let html = '<table><thead><tr><th>ID</th><th>Buyer</th><th>Product</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+        data.forEach(o => {
+          html += `<tr><td>${o.id}</td><td>${o.buyerName || 'N/A'}</td><td>${o.productName || 'N/A'}</td><td>${o.quantity}</td><td>${o.status || 'PENDING'}</td><td>${new Date(o.orderDate).toLocaleDateString()}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      })
+      .catch(err => {
+        container.innerHTML = '<p style="color: red;">Error: ' + err.message + '</p>';
+      });
+  }
+
+  // Load users
+  function loadUsers() {
+    const container = document.getElementById('users-container');
+    container.innerHTML = '<p>Loading...</p>';
+
+    fetch('/admin/api/users')
+      .then(r => r.json())
+      .then(data => {
+        if (!data || data.length === 0) {
+          container.innerHTML = '<p>No users found</p>';
+          return;
+        }
+        let html = '<table><thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Roles</th><th>Status</th></tr></thead><tbody>';
+        data.forEach(u => {
+          const roleStr = (u.roles || []).join(', ') || 'N/A';
+          html += `<tr><td>${u.id}</td><td>${u.username}</td><td>${u.email}</td><td>${roleStr}</td><td>${u.enabled ? '✓ Active' : '✗ Inactive'}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      })
+      .catch(err => {
+        container.innerHTML = '<p style="color: red;">Error: ' + err.message + '</p>';
+      });
+  }
+
+  // Clear all data
+  function clearData() {
+    document.getElementById('products-container').innerHTML = '';
+    document.getElementById('orders-container').innerHTML = '';
+    document.getElementById('users-container').innerHTML = '';
+  }
+</script>
 
 </body>
 </html>
