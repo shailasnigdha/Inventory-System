@@ -604,7 +604,7 @@ networks:
 ## 🔗 Links
 
 - **GitHub Repository**: https://github.com/shailasnigdha/Inventory-System.git
-- **Live Application**: [Render Deployment URL]
+- **Live Application**: https://inventory-app-rqmu.onrender.com/web/auth/login
 - **CI/CD Workflows**: `.github/workflows/`
 - **API Documentation**: See API Endpoints section above
 
